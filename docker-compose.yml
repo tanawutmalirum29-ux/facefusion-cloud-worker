@@ -1,0 +1,24 @@
+services:
+  facefusion-worker:
+    build:
+      context: .
+      args:
+        FACEFUSION_VERSION: ${FACEFUSION_VERSION:-3.9.2}
+    image: ai-code-chat-facefusion-worker:latest
+    restart: unless-stopped
+    environment:
+      FACEFUSION_API_KEY: ${FACEFUSION_API_KEY:?Set FACEFUSION_API_KEY in .env}
+      FACEFUSION_EXECUTION_PROVIDER: ${FACEFUSION_EXECUTION_PROVIDER:-cuda}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-128}
+      MAX_JOB_SECONDS: ${MAX_JOB_SECONDS:-1200}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./.assets:/facefusion/.assets
+      - ./.caches:/facefusion/.caches
+    gpus: all
